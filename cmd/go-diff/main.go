@@ -4,6 +4,7 @@ import (
 	"flag"
 	"go/parser"
 	"go/token"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 )
 
 var (
+	pHelp     = flag.Bool("h", false, "help")
 	pRepo     = flag.String("repo", "", "repository url to be cloned")
 	pBranch   = flag.String("branch", "", "branch to be cloned")
 	pFromHash = flag.String("from", "", "from commit hash")
@@ -48,10 +50,14 @@ func parseFromHash(repo *git.Repository, hash string) (*object.Tree, map[string]
 
 func main() {
 	flag.Parse()
-	repoURL := "https://github.com/dstreamcloud/diff-sample"
-	branch := "go"
-	fromHash := "789ba8319d640ec813c0fd007900b64d9ed9a3b1"
-	toHash := "04cd22e0862ba14f10947fa4623c6b70a0cf37b0"
+	if *pHelp {
+		println("go-diff -repo github.com/user/repo -branch master -from <HASH> -to <HASH>")
+		os.Exit(0)
+	}
+	repoURL := *pRepo
+	branch := *pBranch
+	fromHash := *pFromHash
+	toHash := *pToHash
 
 	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL:           repoURL,
