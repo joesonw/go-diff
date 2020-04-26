@@ -1,4 +1,4 @@
-#Install
+# Install
 
 `go get github.com/dstreamcloud/go-diff`
 
@@ -11,7 +11,7 @@ This will help you to find out which services should be updated.
 # Important
 Only works with `GO MODULES` ATM
 
-#Usage
+# Usage
 
 `go-diff -repo github.com/user/repo -branch master -from <HASH> -to <HASH>`
 
