@@ -12,6 +12,8 @@ import (
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 )
 
@@ -21,6 +23,9 @@ var (
 	pBranch   = flag.String("branch", "", "branch to be cloned")
 	pFromHash = flag.String("from", "", "from commit hash")
 	pToHash   = flag.String("to", "", "to commit hash")
+	pUser     = flag.String("user", "", "git user")
+	pPassword = flag.String("password", "", "git password")
+	pToken    = flag.String("token", "", "git token")
 )
 
 func parseFromHash(repo *git.Repository, hash string) (*object.Tree, map[string]string) {
@@ -59,9 +64,24 @@ func main() {
 	fromHash := *pFromHash
 	toHash := *pToHash
 
+	var auth transport.AuthMethod
+	if tok := *pToken; tok != "" {
+		auth = &http.TokenAuth{Token: tok}
+	} else {
+		user := *pUser
+		pwd := *pPassword
+		if user != "" && pwd != "" {
+			auth = &http.BasicAuth{
+				Username: user,
+				Password: pwd,
+			}
+		}
+	}
+
 	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL:           repoURL,
 		ReferenceName: plumbing.NewBranchReferenceName(branch),
+		Auth:          auth,
 	})
 	die(err)
 
