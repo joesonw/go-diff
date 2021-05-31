@@ -78,11 +78,18 @@ func main() {
 		}
 	}
 
-	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
-		URL:           repoURL,
-		ReferenceName: plumbing.NewBranchReferenceName(branch),
-		Auth:          auth,
-	})
+	var repo *git.Repository
+	var err error
+
+	if strings.HasPrefix(repoURL, "file://") {
+		repo, err = git.PlainOpen(repoURL[7:])
+	} else {
+		repo, err = git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
+			URL:           repoURL,
+			ReferenceName: plumbing.NewBranchReferenceName(branch),
+			Auth:          auth,
+		})
+	}
 	die(err)
 
 	fromTree, fromGoSum := parseFromHash(repo, fromHash)
@@ -160,9 +167,11 @@ func main() {
 				panic(err)
 			}
 			for _, i := range node.Imports {
+				// remove quotes
 				ref := i.Path.Value
 				ref = ref[1:]
 				ref = ref[:len(ref)-1]
+
 				if changedFiles[ref] {
 					name := filepath.Dir(file.Name)
 					name = packageName + "/" + name
