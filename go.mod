@@ -1,4 +1,4 @@
-module github.com/dstreamcloud/go-diff
+module github.com/joesonw/go-diff
 
 go 1.13
 
