@@ -26,6 +26,7 @@ var (
 	pUser     = flag.String("user", "", "git user")
 	pPassword = flag.String("password", "", "git password")
 	pToken    = flag.String("token", "", "git token")
+	pExplain  = flag.Bool("explain", false, "explain why a package is needed")
 )
 
 func parseFromHash(repo *git.Repository, hash string) (*object.Tree, map[string]string) {
@@ -154,6 +155,7 @@ func main() {
 		files = append(files, file)
 		return nil
 	}))
+	deps := map[string][]string{}
 	for hasChanged {
 		hasChanged = false
 		for _, file := range files {
@@ -173,6 +175,7 @@ func main() {
 				ref = ref[:len(ref)-1]
 
 				if changedFiles[ref] {
+					deps[ref] = append(deps[ref], file.Name)
 					name := filepath.Dir(file.Name)
 					name = packageName + "/" + name
 					if strings.HasSuffix(name, "/.") {
@@ -195,6 +198,11 @@ func main() {
 
 	for k := range changedFiles {
 		println(k)
+		if *pExplain {
+			for _, dep := range deps[k] {
+				println("    ", dep)
+			}
+		}
 	}
 }
 
