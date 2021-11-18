@@ -1,6 +1,6 @@
 # Install
 
-`go get github.com/dstreamcloud/go-diff`
+`go get github.com/joesonw/go-diff`
 
 # Why
 
