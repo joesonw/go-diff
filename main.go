@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"flag"
 	"go/parser"
 	"go/token"
@@ -197,10 +198,10 @@ func main() {
 	}
 
 	for k := range changedFiles {
-		println(k)
+		fmt.Println(k)
 		if *pExplain {
 			for _, dep := range deps[k] {
-				println("    ", dep)
+				fmt.Println("    ", dep)
 			}
 		}
 	}
