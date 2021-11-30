@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
 	"go/parser"
 	"go/token"
 	"os"
@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-git/go-billy/v5/memfs"
-	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport"
@@ -31,8 +31,23 @@ var (
 )
 
 func parseFromHash(repo *git.Repository, hash string) (*object.Tree, map[string]string) {
-	commit, err := repo.CommitObject(plumbing.NewHash(hash))
-	die(err)
+	commit, _ := repo.CommitObject(plumbing.NewHash(hash))
+	if commit == nil {
+		iter, err := repo.CommitObjects()
+		die(err)
+
+		for {
+			var err error
+			commit, err = iter.Next()
+			die(err)
+			if strings.HasPrefix(commit.Hash.String(), hash) {
+				break
+			}
+		}
+	}
+	if commit == nil {
+		die(fmt.Errorf("commit %s not found", hash))
+	}
 
 	tree, err := commit.Tree()
 	die(err)
@@ -109,11 +124,10 @@ func main() {
 
 	for _, file := range patches {
 		from, to := file.Files()
-		if from != nil {
+		if from != nil && to != nil {
 			rawChanges[from.Path()] = true
-		}
-		if to != nil {
-			rawChanges[to.Path()] = true
+		} else if from != nil {
+			rawChanges[from.Path()] = true
 		}
 	}
 
