@@ -167,6 +167,24 @@ func main() {
 		if !strings.HasSuffix(file.Name, ".go") {
 			return nil
 		}
+		content, err := file.Contents()
+		if err != nil {
+			return err
+		}
+
+		node, err := parser.ParseFile(fset, file.Name, content, parser.ImportsOnly|parser.ParseComments)
+		if err != nil {
+			return err
+		}
+
+		for _, cg := range node.Comments {
+			for _, c := range cg.List {
+				if strings.HasPrefix(c.Text, "// +build") {
+					return nil
+				}
+			}
+		}
+
 		files = append(files, file)
 		return nil
 	}))
@@ -176,13 +194,14 @@ func main() {
 		for _, file := range files {
 			content, err := file.Contents()
 			if err != nil {
-				panic(err)
+				die(err)
 			}
 
 			node, err := parser.ParseFile(fset, file.Name, content, parser.ImportsOnly)
 			if err != nil {
-				panic(err)
+				die(err)
 			}
+
 			for _, i := range node.Imports {
 				// remove quotes
 				ref := i.Path.Value
