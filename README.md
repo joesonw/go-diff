@@ -15,6 +15,8 @@ Only works with `GO MODULES` ATM
 
 `go-diff -repo github.com/user/repo -branch master -from <HASH> -to <HASH>`
 
+> or use `-repo file:///path/to/your/local/repo` to avoid cloning
+
 # What does it do
 1. It clones your repo
 2. It then checkouts into specified branch.
